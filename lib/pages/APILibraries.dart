@@ -69,15 +69,7 @@ Future<PhotoResponse> getUploadResponse(io.File imgFile) async {
      var response = await http.Response.fromStream(_res);
 
     if (response.body != null) {
-      // if(response.body.indexOf('1') == 400){
-      //   print('400 obj');
-      //   return PhotoResponse(id: '-505',
-      //       url: "Photo doesn't contain a pet",
-      //       subId: '-11',
-      //       originalFilename: '-11',
-      //       pending: -1,
-      //       approved: -1);
-      // }
+
       pRes = photoResponseFromJson(response.body);
       if (pRes.approved == 1){
         return pRes;

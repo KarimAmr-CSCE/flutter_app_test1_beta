@@ -17,11 +17,23 @@ class _MapsPageState extends State<MapsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: init_appBar(rootNav_key), // CHANGE KEY!!!
-        body:  GoogleMap(
-          initialCameraPosition: CameraPosition(
-            target:LatLng(31.233334,30.033333),zoom: 5.4746,
-          ),
-        ),
+        body: Column(
+          children:
+          [
+            Row(
+              children: [
+                IconButton(onPressed:(){}, icon: Icon(Icons.search),)
+              ],
+            ),
+             Expanded(
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target:LatLng(31.233334,30.033333),zoom: 5.4746,
+                ),
+              ),
+            ),
+          ],
+        )
     );
   }
   void _onTap(int index)

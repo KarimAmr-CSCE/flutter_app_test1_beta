@@ -16,7 +16,7 @@ import 'package:flutter/src/widgets/image.dart' as IMAGE;
 import 'package:loading_indicator/loading_indicator.dart';
 
 int _selectedIndex = 0;
-// final isRoot = ValueNotifier<int>(1);
+var p_stat = ValueNotifier<int>(-2);
  final img_src =  ValueNotifier<int>(0);
 bool loading = true;
 class addBreedPage extends StatefulWidget {
@@ -35,7 +35,7 @@ class _addBreedPageState extends State<addBreedPage> {
     File? imageFile;
     late Future<PhotoResponse> pRes;
     late FToast fToast;
-    var p_stat = -2;
+    // var p_stat = -2;
     late Color statColor;
     late OverlayEntry loading;
     final Size windowSize = MediaQueryData.fromWindow(window).size;
@@ -147,7 +147,7 @@ class _addBreedPageState extends State<addBreedPage> {
     super.initState();
     finalBreeds = getBreedList(0);
     fToast = FToast();
-    p_stat = -2;
+    p_stat.value = -2;
     statColor = Colors.grey;
     img_src.value = 0;
     cam_Btn = true;
@@ -166,7 +166,7 @@ class _addBreedPageState extends State<addBreedPage> {
     //handle status color for photo analysis
     Color handleColor() {
       statColor =
-      p_stat == 0 ? Colors.teal : p_stat == -1 ? Colors.redAccent : Colors.grey;
+      p_stat.value == 0 ? Colors.teal : p_stat.value == -1 ? Colors.redAccent : Colors.grey;
       return statColor;
     }
     return Scaffold(
@@ -232,15 +232,15 @@ class _addBreedPageState extends State<addBreedPage> {
               ),
               onPressed: () async{
                 if (cam_Btn){
-                  await pickImage(ImageSource.gallery);
+                  await pickImage(ImageSource.camera);
                   print(cam_Btn);
                   setState(() {});
-                  p_stat = -2;
+                  p_stat.value = -2;
                   isLoading();
                   OverlayState? overlay = Overlay.of(context);
                   overlay?.insert(loading);
                   cam_Btn = false;
-                  // p_stat = await analyzeImage();
+                  p_stat.value = await analyzeImage();
                   setState(() {});
                   stopLoading();
                   cam_Btn = true;
@@ -257,10 +257,10 @@ class _addBreedPageState extends State<addBreedPage> {
             SizedBox(height: 20),
             AnimatedSlide(
               duration: animationDuration_1,
-              offset: p_stat == 0 ? Offset(0, 0) : Offset.zero ,
+              offset: p_stat.value == 0 ? Offset(0, 0) : Offset.zero ,
               child: AnimatedOpacity(
                 duration: animationDuration_1,
-                opacity: p_stat == -1 ? 1 : 0,
+                opacity: p_stat.value == -1 ? 1 : 0,
 
                 child: Text("Couldn't find a dog in photo",
                   style: TextStyle(
@@ -269,30 +269,52 @@ class _addBreedPageState extends State<addBreedPage> {
                     color: Colors.redAccent
                   )),
               ),
-            )
+            ),
+            ValueListenableBuilder<int>(
+                valueListenable: p_stat,
+                builder: (BuildContext context, int value, Widget? child){
+                  if (value == 0){
+                    return ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.red, backgroundColor: Colors.teal.shade100,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0)
+                          )
+                      ),
+                      onPressed: () {
+                        BA_key.currentState?.pushNamed('/pet_register', arguments: imageFile);
+                        setState((){});
+                      },
+                      child: Text('NEXT',
+                        style: TextStyle(
+                            color: Colors.grey.shade900
+                        ),),
+                    );
+                  }else{
+                    return SizedBox(height: 1);
+                  }
+                }
+            ),
           ],
         ),
-      floatingActionButton: AnimatedSlide(
-        duration: animationDuration_1,
-        offset: p_stat == 0 ? Offset(0, 0) : Offset.zero ,
-        child: AnimatedOpacity(
-          duration: animationDuration_1,
-          opacity: p_stat == 0 ? 1 : 1,
-
-          child: FloatingActionButton.extended(
-            foregroundColor: Colors.white,
-            backgroundColor: Colors.blueGrey,
-            label: Text('Next'),
-            icon: Icon(Icons.navigate_next_outlined),
-            onPressed: () {
-              print('what?');
-              BA_key.currentState?.pushNamed('/pet_register', arguments: imageFile);
-              setState((){});
-            },
-          ),
-        ),
-      ),
-    );
+      floatingActionButton: ValueListenableBuilder<int>(
+          valueListenable: p_stat,
+          builder: (BuildContext context, int value, Widget? child){
+            return Visibility(
+                visible: value == 0 ? true : false,
+                child: FloatingActionButton.extended(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blueGrey,
+                  label: Text('Next'),
+                  icon: Icon(Icons.navigate_next_outlined),
+                  onPressed: () {
+                    print('what?');
+                    BA_key.currentState?.pushNamed('/pet_register', arguments: imageFile);
+                    setState((){});
+                  },
+                ));
+          }),
+      );
   }
 
   void _onTap(int index)
